@@ -62,6 +62,13 @@ class growl(object):
             print "iconpath          =", iconpath
             print "-"*220
         if isinstance(host, list):
+            if host == []:
+                publisher = Publisher(app, [event], icon=iconpath, timeout = timeout)
+                try:
+                    publisher.register()
+                except:
+                    pass
+                publisher.publish(event, title, text, icon=icon)
             for i in host:
                 publisher = Publisher(app, [event], icon=iconpath, timeout = timeout, host = i.get('host'), port = i.get('port'))
                 try:
