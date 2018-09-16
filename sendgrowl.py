@@ -50,7 +50,7 @@ class growl(object):
 
         if not timeout:
             timeout = 20
-        if os.getenv('DEBUG'):
+        if os.getenv('DEBUG_EXTRA'):
             print "app               =", app
             print "event             =", event
             print "title             =", title
