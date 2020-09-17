@@ -4,12 +4,16 @@ from gntplib import Publisher,  Resource
 import gntplib
 import os, sys
 import mimetypes
+import argparse
+from configset import configset
 
 class growl(object):
     def __init__(self, icon = None, stricon = None):
         super(growl, self)
         self.icon = icon
         self.stricon = None
+        self.configname = os.path.join(os.path.dirname(__file__), 'sendgrowl.ini')
+        self.config = configset(self.configname)
 
     def parse_host(self, hosts):
         list_hosts = []
@@ -31,8 +35,9 @@ class growl(object):
                         list_hosts.append({'host':host, 'port':port})
                     else:
                         list_hosts.append({'host':i, 'port':23053})
-        else:
-            list_hosts.append({'host':hosts, 'port':23053})
+            else:
+                list_hosts.append({'host':hosts, 'port':23053})
+        
         return list_hosts
 
     def publish(self, app, event, title, text, host='127.0.0.1', port=23053, timeout=20, icon=None, iconpath=None):
@@ -63,6 +68,28 @@ class growl(object):
             print ("icon              =", icon)
             print ("iconpath          =", iconpath)
             print ("-"*220)
+        if not host:
+            host = self.config.get_config('SERVER', 'host')
+            if host == None or host == "None":
+                host = '127.0.0.1'
+        if not port:
+            port = self.config.get_config('SERVER', 'port')
+            if port:
+                port = int(port)
+            if port == None or port == "None":
+                port = 23053
+        if not timeout:
+            timeout = self.config.get_config('GENERAL', 'timeout')
+            if timeout == None or timeout == "None":
+                timeout = 20
+        if not iconpath:
+            iconpath = self.config.get_config('GENERAL', 'icon')
+            if iconpath == None or iconpath == "None":
+                iconpath = None
+        if not host:
+            host = "127.0.0.1"
+        #print("host =", host)
+        #print("port =", port)
         if isinstance(host, list):
             if host == []:
                 publisher = Publisher(app, [event], icon=iconpath, timeout = timeout)
@@ -101,12 +128,35 @@ class growl(object):
             if isinstance(self.stricon, list):
                 print (self.stricon)
             with open(imgfile, 'wb') as img:
-                img.write(self.stricon.decode('base64'))
+                if sys.version_info.major == 3:
+                    import base64
+                    img.write(base64.b64decode(self.stricon))
+                else:
+                    img.write(self.stricon.decode('base64'))
             return imgfile
+
+    def usage(self):
+        parser = argparse.ArgumentParser(formatter_class = argparse.RawTextHelpFormatter)
+        parser.add_argument('APP_NAME', action = 'store', help = 'App name as registered/registering', default = 'test app')
+        parser.add_argument('EVENT_NAME', action = 'store', help = 'Event name', default = 'test event')
+        parser.add_argument('TITLE', action = 'store', help = 'Title name', default = 'test title')
+        parser.add_argument('TEXT', action = 'store', help = 'Message/Text to be sending', default = 'test message')
+        parser.add_argument('-H', '--host', action = 'store', help = 'host growl server')
+        parser.add_argument('-P', '--port', action = 'store', help = 'port growl server')
+        parser.add_argument('-t', '--timeout', action = 'store', help = 'Timeout message display default: 20')
+        parser.add_argument('-i', '--icon', action = 'store', help = 'Image icon path, default growl icon')
+        parser.add_argument('-p', '--pushbullet', action = 'store_true', help = 'Format to pushbullet')
+        if len(sys.argv) == 1:
+            parser.print_help()
+        else:
+            args = parser.parse_args()
+            self.publish(args.APP_NAME, args.EVENT_NAME, args.TITLE, args.TEXT, args.host, args.port, args.timeout, iconpath = args.icon)
 
 if __name__ == "__main__":
     mclass = growl()
-    event = 'test by me'
+    mclass.usage()
+    #event = 'test by me'
     #mclass.published('test', event, "Just Test", "HELLLOOOOOOOO")
     #def publish(self, app, event, title, text, host='127.0.0.1', port=23053, timeout=20, icon=None, iconpath=None):
-    mclass.publish('test', event, "Just Test", "HELLLOOOOOOOO", sys.argv[1])
+    #mclass.publish('test', event, "Just Test", "HELLLOOOOOOOO", sys.argv[1])
+   
