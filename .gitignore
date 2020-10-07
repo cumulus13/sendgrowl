@@ -5,6 +5,12 @@
 *.mp3
 *.wav
 .hg/
+*build/
+*dest/
+*dests/
+*egg/
+*info/
+
 *.hgignore
 *.hgtags
 *.bak

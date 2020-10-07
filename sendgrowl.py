@@ -1,11 +1,11 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 from __future__ import print_function
 from gntplib import Publisher,  Resource
 import gntplib
 import os, sys
 import mimetypes
 import argparse
-
+import traceback
 
 class growl(object):
     def __init__(self, icon = None, stricon = None):
@@ -108,6 +108,8 @@ class growl(object):
             host = "127.0.0.1"
         #print("host =", host)
         #print("port =", port)
+        #print("ICON X =", icon)
+        #print("type(icon) =", type(icon))        
         if isinstance(host, list):
             if host == []:
                 publisher = Publisher(app, [event], icon=iconpath, timeout = timeout)
@@ -115,24 +117,51 @@ class growl(object):
                     publisher.register()
                 except:
                     pass
-                publisher.publish(event, title, text, icon=icon)
+                try:
+                    publisher.publish(event, title, text, icon=icon)
+                except:
+                    if "StopIteration" in traceback.format_exc():
+                        print("ERROR [GROWL]: 'StopIteration'")
+                    if sys.getenv('DEBUG_EXTRA'):
+                        print(traceback.format_exc())
+                    
             for i in host:
                 publisher = Publisher(app, [event], icon=iconpath, timeout = timeout, host = i.get('host'), port = i.get('port'))
                 try:
                     publisher.register()
                 except:
                     pass
-                publisher.publish(event, title, text, icon=icon)
+                try:
+                    publisher.publish(event, title, text, icon=icon)
+                except:
+                    if "StopIteration" in traceback.format_exc():
+                        print("ERROR [GROWL]: 'StopIteration'")
+                    if sys.getenv('DEBUG_EXTRA'):
+                        print(traceback.format_exc())
+                        
         else:
             publisher = Publisher(app, [event], icon=iconpath, timeout = timeout, host = host, port = port)
             try:
                 publisher.register()
             except:
                 pass
-            publisher.publish(event, title, text, icon=icon)
-
+                
+            try:
+                    publisher.publish(event, title, text, icon=icon)
+            except:
+                if "StopIteration" in traceback.format_exc():
+                    print("ERROR [GROWL]: 'StopIteration'")
+                if sys.getenv('DEBUG_EXTRA'):
+                    print(traceback.format_exc())
+                
     def send(self, event, title, text):
-        gntplib.publish(event, title, text)
+        try:
+            gntplib.publish(event, title, text)
+        except:
+            if "StopIteration" in traceback.format_exc():
+                print("ERROR [GROWL]: 'StopIteration'")
+            if sys.getenv('DEBUG_EXTRA'):
+                print(traceback.format_exc())
 
     def makeicon(self, path=None, stricon = None):
         if self.stricon == None:
@@ -164,9 +193,9 @@ class growl(object):
         parser.add_argument('TEXT', action = 'store', help = 'Message/Text to be sending', default = 'test message')
         parser.add_argument('-H', '--host', action = 'store', help = 'host growl server')
         parser.add_argument('-P', '--port', action = 'store', help = 'port growl server')
-        parser.add_argument('-t', '--timeout', action = 'store', help = 'Timeout message display default: 20')
+        parser.add_argument('-t', '--timeout', action = 'store', help = 'Timeout message display default: 20', type=int)
         parser.add_argument('-i', '--icon', action = 'store', help = 'Image icon path, default growl icon')
-        parser.add_argument('-p', '--pushbullet', action = 'store_true', help = 'Format to pushbullet')
+        #parser.add_argument('-p', '--pushbullet', action = 'store_true', help = 'Format to pushbullet')
         if len(sys.argv) == 1:
             parser.print_help()
         else:
