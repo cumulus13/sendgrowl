@@ -3,6 +3,7 @@
 *.rar
 *.7z
 *.mp3
+*.traceback.py
 *.wav
 .hg/
 *build/
