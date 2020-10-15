@@ -23,7 +23,7 @@ setup(
     #    "console_scripts": ["drawille=drawille:__main__"]
     #},
     entry_points = {
-         "console_scripts": ["sendgrowl = growl:usage",]
+         "console_scripts": ["sendgrowl = sendgrowl:usage",]
     },
     classifiers = [
         "Development Status :: 4 - Beta",
