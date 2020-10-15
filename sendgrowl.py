@@ -48,9 +48,9 @@ class growl(object):
                         list_hosts.append({'host':i, 'port':23053})
             else:
                 list_hosts.append({'host':hosts, 'port':23053})
-        
+
         return list_hosts
-        
+
 
     def publish(self, app, event, title, text, host='127.0.0.1', port=23053, timeout=20, icon=None, iconpath=None):
         if not iconpath:
@@ -91,10 +91,10 @@ class growl(object):
         if os.getenv('DEBUG'):
             print("publish -> iconpath =", iconpath)
             print("publish -> len(icon) =", len(icon))
-        
+
         if icon:
             icon = Resource(icon)
-        
+
         if host:
             host = self.parse_host(host)
         else:
@@ -155,11 +155,13 @@ class growl(object):
                 try:
                     publisher.publish(event, title, text, icon=icon)
                 except:
+                    if os.getenv('DEBUG_EXTRA'):
+                        print(traceback.format_exc())
                     if "StopIteration" in sys.exc_info()[1].__repr__():
                         pass
                 else:
                     print("GROWL not publish !")
-                    
+
             for i in host:
                 #print("i =", i)
                 publisher = Publisher(app, [event], icon=iconpath, timeout = timeout, host = i.get('host'), port = i.get('port'))
@@ -167,7 +169,7 @@ class growl(object):
                     publisher.register()
                 except:
                     pass
-                
+
                 try:
                     if os.getenv('DEBUG_EXTRA'):
                         print("event =", event)
@@ -176,26 +178,30 @@ class growl(object):
                         print("icon  =", icon)
                     publisher.publish(event, title, text, icon=icon)
                 except:
+                    if os.getenv('DEBUG_EXTRA'):
+                        print(traceback.format_exc())                    
                     if "StopIteration" in sys.exc_info()[1].__repr__():
                         pass
                     else:
                         print("GROWL not publish !")
-                        
+
         else:
             publisher = Publisher(app, [event], icon=iconpath, timeout = timeout, host = host, port = port)
             try:
                 publisher.register()
             except:
                 pass
-                
+
             try:
-                    publisher.publish(event, title, text, icon=icon)
+                publisher.publish(event, title, text, icon=icon)
             except:
+                if os.getenv('DEBUG_EXTRA'):
+                    print(traceback.format_exc())                
                 if "StopIteration" in sys.exc_info()[1].__repr__():
                     pass
                 else:
                     print("GROWL not publish !")
-                
+
     def send(self, event, title, text):
         try:
             gntplib.publish(event, title, text)
@@ -206,6 +212,7 @@ class growl(object):
                 print("GROWL not send !")
 
     def makeicon(self, path=None, stricon = None):
+        imgfile = os.path.abspath(os.path.join(os.path.dirname(__file__), 'growl.png'))
         if self.stricon == None:
             self.stricon = stricon
         if os.path.exists(str(path)):
@@ -1182,24 +1189,31 @@ MXyCmN0B45OQsMlasPEbJByiY9BnPXl80tTR7E4tADzS5B4xtwdBQEwPYYDJTT591gW+/fHjxyEU
 vCeffNI7ceKE/9RTTyX57IdMfygADgXAfRAGtwssYtoSAoksIFStVsO8QxuvkSCA+R+8t7Oz429u
 biaOHyCtbZHPHjyHC0CM7z/++OM+mfPe7OwsGDx4D6+9/PLLiUx9m4DdIdM/ggLg/xdgAJ/G1v7z
 h5WQAAAAAElFTkSuQmCC"""
-            
-            
-            imgfile = os.path.abspath(os.path.join(os.path.dirname(__file__), 'growl.png'))
-            if os.getenv('DEBUG'):
-                print("make_icon -> imgfile =", imgfile)
-                print("make_icon -> type(self.stricon) =", type(self.stricon))
-                print("make_icon -> len(self.stricon) =", len(self.stricon))
-            if isinstance(self.stricon, list):
-                print (self.stricon)
-            with open(imgfile, 'wb') as img:
-                if sys.version_info.major == 3:
-                    import base64
-                    img.write(base64.b64decode(self.stricon))
-                else:
-                    img.write(self.stricon.decode('base64'))
-            if os.getenv('DEBUG'):
-                print("make_icon -> imgfile =", imgfile)
-            return imgfile
+
+                imgfile = os.path.abspath(os.path.join(os.path.dirname(__file__), 'growl.png'))
+                if os.getenv('DEBUG'):
+                    print("make_icon -> imgfile =", imgfile)
+                    print("make_icon -> type(self.stricon) =", type(self.stricon))
+                    print("make_icon -> len(self.stricon) =", len(self.stricon))
+
+                    with open(imgfile, 'wb') as img:
+                        if sys.version_info.major == 3:
+                            import base64
+                            img.write(base64.b64decode(self.stricon))
+                    else:
+                        img.write(self.stricon.decode('base64'))
+                if os.getenv('DEBUG'):
+                    print("make_icon -> imgfile =", imgfile)
+                return imgfile
+            else:
+                with open(imgfile, 'wb') as img:
+                    if sys.version_info.major == 3:
+                        img.write(bytes(self.stricon))
+                    else:
+                        img.write(self.stricon)
+                if os.getenv('DEBUG'):
+                    print("make_icon -> imgfile =", imgfile)
+                return imgfile
 
     def usage(self):
         parser = argparse.ArgumentParser(formatter_class = argparse.RawTextHelpFormatter)
@@ -1225,4 +1239,4 @@ if __name__ == "__main__":
     #mclass.published('test', event, "Just Test", "HELLLOOOOOOOO")
     #def publish(self, app, event, title, text, host='127.0.0.1', port=23053, timeout=20, icon=None, iconpath=None):
     #mclass.publish('test', event, "Just Test", "HELLLOOOOOOOO", sys.argv[1])
-   
+

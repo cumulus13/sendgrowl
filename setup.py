@@ -1,30 +1,29 @@
 from setuptools import setup, find_packages
-
+import __version__
+version = __version__.version
 setup(
     name = 'sendgrowl',
-    version = '0.3.2',
+    version = version,
     author = 'Hadi Cahyadi LD',
     author_email = 'cumulus13@gmail.com',
-    description = ('simple send notification to growl based on gntplib'),
+    description = ('simple youtube url and channel downloader'),
     license = 'MIT',
-    keywords = "growl terminal gntplib gntp",
+    keywords = "youtube downloader download channel",
     url = 'https://github.com/cumulus13/sendgrowl',
     scripts = [],
     py_modules = ['sendgrowl'],
     packages = find_packages(),
-    install_requires = [],
     download_url = 'https://github.com/cumulus13/sendgrowl/tarball/master',
     install_requires=[
         'gntplib',
-        'configset',
-        'configparser'
+        'argparse'
     ],
     # TODO
     #entry_points={
     #    "console_scripts": ["drawille=drawille:__main__"]
     #},
     entry_points = {
-         "console_scripts": ["sendgrowl = sendgrowl:usage",]
+         "console_scripts": ["sendgrowl = growl:usage",]
     },
     classifiers = [
         "Development Status :: 4 - Beta",
