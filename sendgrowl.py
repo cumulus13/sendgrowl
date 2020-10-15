@@ -1200,8 +1200,8 @@ h5WQAAAAAElFTkSuQmCC"""
                         if sys.version_info.major == 3:
                             import base64
                             img.write(base64.b64decode(self.stricon))
-                    else:
-                        img.write(self.stricon.decode('base64'))
+                        else:
+                            img.write(self.stricon.decode('base64'))
                 if os.getenv('DEBUG'):
                     print("make_icon -> imgfile =", imgfile)
                 return imgfile
