@@ -6,7 +6,7 @@ setup(
     version = version,
     author = 'Hadi Cahyadi LD',
     author_email = 'cumulus13@gmail.com',
-    description = ('simple youtube url and channel downloader'),
+    description = ('simple send notify to growl'),
     license = 'MIT',
     keywords = "youtube downloader download channel",
     url = 'https://github.com/cumulus13/sendgrowl',
