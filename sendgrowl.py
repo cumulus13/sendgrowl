@@ -1232,9 +1232,12 @@ h5WQAAAAAElFTkSuQmCC"""
             args = parser.parse_args()
             self.publish(args.APP_NAME, args.EVENT_NAME, args.TITLE, args.TEXT, args.host, args.port, args.timeout, iconpath = args.icon)
 
-if __name__ == "__main__":
+def usage():
     mclass = growl()
     mclass.usage()
+
+if __name__ == "__main__":
+    usage()
     #event = 'test by me'
     #mclass.published('test', event, "Just Test", "HELLLOOOOOOOO")
     #def publish(self, app, event, title, text, host='127.0.0.1', port=23053, timeout=20, icon=None, iconpath=None):
