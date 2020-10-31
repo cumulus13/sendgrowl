@@ -88,6 +88,13 @@ class growl(object):
                         icon = open(iconpath, 'rb').read()
                 except:
                     pass
+            else:
+                try:
+                    iconpath = self.makeicon(stricon = icon)
+                    icon = open(iconpath, 'rb').read()
+                except:
+                    pass
+                
         if os.getenv('DEBUG'):
             print("publish -> iconpath =", iconpath)
             print("publish -> len(icon) =", len(icon))
