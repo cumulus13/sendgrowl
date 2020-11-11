@@ -160,7 +160,13 @@ class growl(object):
                 except:
                     pass
                 try:
-                    publisher.publish(event, title, text, icon=icon)
+                    if sys.version_info.major < 3:
+                        publisher.publish(event, title, text, icon=icon)
+                    else:
+                        event = event.encode('utf-8')
+                        title = title.encode('utf-8')
+                        text = text.encode('utf-8')
+                        publisher.publish(event, title, text, icon=icon)
                 except:
                     if os.getenv('DEBUG_EXTRA'):
                         print(traceback.format_exc())
@@ -183,7 +189,22 @@ class growl(object):
                         print("title =", title)
                         print("text  =", text)
                         print("icon  =", icon)
-                    publisher.publish(event, title, text, icon=icon)
+                    if sys.version_info.major < 3:
+                        publisher.publish(event, title, text, icon=icon)
+                    else:
+                        event = event.encode('utf-8')
+                        title = title.encode('utf-8')
+                        text = text.encode('utf-8')
+                        try:
+                            icon = icon.encode('utf-8')
+                        except:
+                            icon = icon
+
+                        if not isinstance(icon, Resource) and os.path.isfile(icon):
+                            icon_str = open(icon, 'rb').read()
+                            icon = Resource(icon)
+                        publisher.publish(event, title, text, icon=icon)
+                    # publisher.publish(event, title, text, icon=icon)
                 except:
                     if os.getenv('DEBUG_EXTRA'):
                         print(traceback.format_exc())                    
