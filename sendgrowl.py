@@ -109,7 +109,7 @@ class growl(object):
             except:
                 pass
         else:
-            print("iconpath:", iconpath)
+            # print("iconpath:", iconpath)
             if iconpath:
                 try:
                     if os.path.isfile(iconpath):
