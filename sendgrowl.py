@@ -71,7 +71,7 @@ class growl(object):
             pass
 
     @classmethod
-    def publish(self, app, event, title, text, host='127.0.0.1', port=23053, timeout=20, icon=None, iconpath=None, gntp_callback = None):
+    def publish(self, app, event, title, text, host='127.0.0.1', port=23053, timeout=20, icon=None, iconpath=None, gntp_callback = None, sticky = False):
         # if not isinstance(event, list):
         #     event = [event]
         if sys.version_info.major == 2:
@@ -137,11 +137,8 @@ class growl(object):
             if os.getenv('DEBUG'):
                 print("len_icon =", len(icon))
                 print("type(icon) =", type(icon))
-            if sys.version_info.major == 2:
-                icon = Resource(icon)
-            else:
-                icon = Resource(bytes(icon, encoding='utf-8'))
-
+            icon = Resource(icon)
+            
         if host:
             host = self.parse_host(host)
         else:
@@ -190,12 +187,12 @@ class growl(object):
                 publisher = Publisher(app, self.EVENT, icon=iconpath, timeout = timeout)
                 try:
                     if sys.version_info.major < 3:
-                        publisher.publish(event, title, text, icon=icon, gntp_callback=gntp_callback)
+                        publisher.publish(event, title, text, icon=icon, gntp_callback=gntp_callback, sticky = sticky)
                     else:
                         event = event.encode('utf-8')
                         title = title.encode('utf-8')
                         text = text.encode('utf-8')
-                        publisher.publish(event, title, text, icon=icon)
+                        publisher.publish(event, title, text, icon=icon, gntp_callback=gntp_callback, sticky = sticky)
                 except:
                     try:
                         try:
@@ -208,7 +205,7 @@ class growl(object):
                                 icon_str = open(icon, 'rb').read()
                                 icon = Resource(icon)
 
-                            publisher.publish(event, title, text, icon=icon, gntp_callback=gntp_callback)
+                            publisher.publish(event, title, text, icon=icon, gntp_callback=gntp_callback, sticky = sticky)
                         else:
                             event = event.encode('utf-8')
                             title = title.encode('utf-8')
@@ -216,7 +213,7 @@ class growl(object):
                             if not isinstance(icon, Resource) and os.path.isfile(icon):
                                 icon_str = open(icon, 'rb').read()
                                 icon = Resource(icon)
-                            publisher.publish(event, title, text, icon=icon)     
+                            publisher.publish(event, title, text, icon=icon, gntp_callback=gntp_callback, sticky = sticky)     
                     except:
                         if os.getenv('DEBUG_EXTRA'):
                             print(traceback.format_exc())
@@ -233,7 +230,7 @@ class growl(object):
                         if not isinstance(icon, Resource) and os.path.isfile(icon):
                             icon_str = open(icon, 'rb').read()
                             icon = Resource(icon)
-                    publisher.publish(event, title, text, icon=icon, gntp_callback=gntp_callback)
+                    publisher.publish(event, title, text, icon=icon, gntp_callback=gntp_callback, sticky = sticky)
                 except:
                     try:
                         publisher.register()
@@ -244,7 +241,7 @@ class growl(object):
                             if not isinstance(icon, Resource) and os.path.isfile(icon):
                                 icon_str = open(icon, 'rb').read()
                                 icon = Resource(icon)
-                        publisher.publish(event, title, text, icon=icon, gntp_callback=gntp_callback)
+                        publisher.publish(event, title, text, icon=icon, gntp_callback=gntp_callback, sticky = sticky)
                     except:
                         if os.getenv('DEBUG_EXTRA'):
                             print(traceback.format_exc())                    
@@ -261,7 +258,7 @@ class growl(object):
                     if not isinstance(icon, Resource) and os.path.isfile(icon):
                         icon_str = open(icon, 'rb').read()
                         icon = Resource(icon)
-                publisher.publish(event, title, text, icon=icon, gntp_callback=gntp_callback)
+                publisher.publish(event, title, text, icon=icon, gntp_callback=gntp_callback, sticky = sticky)
             except:
                 try:
                     publisher.register()
@@ -272,7 +269,7 @@ class growl(object):
                         if not isinstance(icon, Resource) and os.path.isfile(icon):
                             icon_str = open(icon, 'rb').read()
                             icon = Resource(icon)
-                    publisher.publish(event, title, text, icon=icon, gntp_callback=gntp_callback)
+                    publisher.publish(event, title, text, icon=icon, gntp_callback=gntp_callback, sticky = sticky)
                 except:
                     if os.getenv('DEBUG_EXTRA'):
                         print(traceback.format_exc())                    
