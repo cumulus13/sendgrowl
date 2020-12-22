@@ -223,6 +223,10 @@ class growl(object):
                             print("GROWL not publish !")
 
             for i in host:
+                
+                if ":" in i.get('host') and i.get('port'):
+                    i['host'] = i.get('host').split(":")[0]
+
                 publisher = Publisher(app, self.EVENT, icon=iconpath, timeout = timeout, host = i.get('host'), port = i.get('port'))
 
                 try:
