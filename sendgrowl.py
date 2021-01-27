@@ -131,7 +131,14 @@ class growl(object):
                 
         if os.getenv('DEBUG'):
             print("publish -> iconpath =", iconpath)
-            print("publish -> len(icon) =", len(icon))
+            try:
+                print("publish -> len(icon) =", len(icon))
+            except:
+                print("publish -> len(icon) =", 0)
+        
+        if iconpath and not icon:
+            if os.path.isfile(iconpath):
+                icon = open(iconpath , 'rb').read()
 
         if icon:
             if os.getenv('DEBUG'):
@@ -157,7 +164,7 @@ class growl(object):
             print ("host              =", host)
             print ("port              =", port)
             print ("timeout           =", timeout)
-            print ("icon              =", icon)
+            print ("icon              =", type(icon))
             print ("iconpath          =", iconpath)
             print ("-"*220)
 
