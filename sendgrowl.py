@@ -109,7 +109,6 @@ class growl(object):
             except:
                 pass
         else:
-            # print("iconpath:", iconpath)
             if iconpath:
                 try:
                     if os.path.isfile(iconpath):
@@ -145,7 +144,7 @@ class growl(object):
                 print("len_icon =", len(icon))
                 print("type(icon) =", type(icon))
             icon = Resource(icon)
-            
+
         if host:
             host = self.parse_host(host)
         else:
@@ -275,6 +274,7 @@ class growl(object):
                     publisher.register()
                 except:
                     pass
+
                 try:
                     if icon:
                         if not isinstance(icon, Resource) and os.path.isfile(icon):
