@@ -3,7 +3,7 @@
 *.rar
 *.7z
 *.mp3
-*.traceback.py
+*.traceback.log
 *.wav
 .hg/
 *build/
@@ -11,7 +11,7 @@
 *dests/
 *egg/
 *info/
-
+__pycache__/
 *.hgignore
 *.hgtags
 *.bak
