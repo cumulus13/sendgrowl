@@ -26,25 +26,29 @@ class growl(Publisher):
     APP_SPECIFIC_HEADERS = None
     GNTP_CLIENT_CLASS = None
     KWARGS = {}
-    CONFIG = configset()
+    try:
+        CONFIG = configset.configset()
+    except:
+        from importlib import util
+        spec = util.spec_from_file_location("configset", os.path.join(os.path.dirname(os.path.realpath(__file__)), "configset\\configset.py"))
+        configset = util.module_from_spec(spec)
+        sys.modules['configset'] = configset
+        spec.loader.exec_module(configset)
+        CONFIG = configset.configset()
     
-    #def __init__(self, name, event_defs, icon=None, custom_headers=None, app_specific_headers=None, gntp_client_class=None, **kwargs)
-    #def __init__(self, app, event_defs, name, title, text, id_ = None, sticky=False, priority=0, coalescing_id=None, callback=None, gntp_callback=None, icon=None, custom_headers=None, app_specific_headers=None, gntp_client_class=None, **kwargs):
-    def __init__(self, app = None, events = None, icon=None, custom_headers=None, app_specific_headers=None, gntp_client_class=None, **kwargs): 
-        self.name = app or self.APP or self.CONFIG.get_config('GENERAL', 'app')
-        self.event_defs = events or self.EVENTS or list(filter(None, list(set([i.strip() for i in re.split(",| |\n", self.CONFIG.get_config('GENERAL', 'events'))]))))
+    def __init__(self, name, event_defs, icon=None, custom_headers=None, app_specific_headers=None, gntp_client_class=None, **kwargs):
+        #pass
+    #def __init__(self, app = None, events = None, icon=None, custom_headers=None, app_specific_headers=None, gntp_client_class=None, **kwargs): 
+        self.app = name or self.APP or self.CONFIG.get_config('GENERAL', 'app')
+        self.EVENTS = self.EVENTS or list(filter(None, list(set([i.strip() for i in re.split(",| |\n", self.CONFIG.get_config('GENERAL', 'events'))]))))
+        if not isinstance(event_defs, list): self.EVENTS.append(event_defs)
+        self.events = self.event_defs = self.EVENTS
         self.icon = icon or self.ICON
-        #icon1 = self.make_icon(icon or self.ICON)
         self.custom_headers = custom_headers or self.CUSTOM_HEADERS
         self.app_specific_headers = app_specific_headers or self.APP_SPECIFIC_HEADERS
         self.gntp_client_class = gntp_client_class or self.GNTP_CLIENT_CLASS
         kwargs = kwargs or self.KWARGS
-        super(growl, self).__init__(app, events, self.icon, self.custom_headers, self.app_specific_headers, self.gntp_client_class, **kwargs)
-        
-        try:
-            self.register()
-        except:
-            print(traceback.format_exc())
+        super(growl, self).__init__(name, event_defs, self.icon, self.custom_headers, self.app_specific_headers, self.gntp_client_class, **kwargs)
     
     def make_icon(self, icon):
         if isinstance(icon, str):
@@ -54,24 +58,44 @@ class growl(Publisher):
                 icon = None
         return icon
 
-    def Publish(self, event, title, text, id_=None, sticky=False, priority=0, icon=None, coalescing_id=None, callback=None, gntp_callback=None, app = None, events = None, master_icon = None, custom_headers=None, app_specific_headers=None, gntp_client_class=None , **kwargs):
+    def Publish(self, event, title, text, id_=None, sticky=False, priority=0, icon=None, coalescing_id=None, callback=None, gntp_callback=None, app = None, events = None, iconpath = None, custom_headers=None, app_specific_headers=None, gntp_client_class=None , **kwargs):
         if app: self.name = app
-        if events: self.event_defs = events
-        if master_icon: self.icon = master_icon
+        if iconpath: self.icon = iconpath
         if custom_headers: self.custom_headers = custom_headers
         if app_specific_headers: self.app_specific_headers = app_specific_headers
         if gntp_client_class: self.gntp_client_class = gntp_client_class
         
-        if not isinstance(self.event_defs, list): self.event_defs = []
-        if not self.event_defs: self.event_defs = []
-        self.event_defs.append(event)
-        self.register()
-        if kwargs.get('host'):
-            if os.getenv('DEBUG'):
-                print("host      :", kwargs.get('host'))
-                print("type(host):", type(kwargs.get('host')))            
-            if isinstance(kwargs.get('host'), list):
-                for i in kwargs.get('host'):
+        if events: self.event_defs = events
+        if not isinstance(self.event_defs, list): self.event_defs = [self.event_defs]
+        if not event in self.event_defs: self.event_defs.append(event)
+        
+        hosts = kwargs.get('host')
+        port = kwargs.get('port')
+        if port: self.port = port
+        timeout = kwargs.get('timeout')
+        if timeout: self.timeout = timeout
+        try:
+            kwargs.pop('host')
+        except:
+            pass
+        try:
+            kwargs.pop('port')
+        except:
+            pass
+        try:
+            kwargs.pop('timeout')
+        except:
+            pass        
+        try:
+            self.register()
+        except:
+            pass        
+        if hosts:
+            if os.getenv('DEBUG_EXTRA'):
+                print("hosts      :", hosts)
+                print("type(hosts):", type(hosts))            
+            if isinstance(hosts, list):
+                for i in hosts:
                     if isinstance(i,  dict):
                         host = i.get('host')
                         port = i.get('port')
@@ -90,17 +114,64 @@ class growl(Publisher):
                             self.host = host
                         if port:
                             self.port = port
-                    #for i in event_defs:
+                            
                     try:
-                        kwargs.pop('host')
+                        if os.getenv('DEBUG_EXTRA'):
+                            print("hosts               :", hosts)
+                            print("type(hosts)         :", type(hosts))
+                            print("port                :", port)
+                            print("type(port)          :", type(port))
+                            print("event               :", event)
+                            print("type(event)         :", type(event))
+                            print("title               :", title)
+                            print("type(title)         :", type(title))
+                            print("text                :", text)
+                            print("type(text)          :", type(text))
+                            print("icon                :", icon)
+                            print("priority            :",  priority)
+                            print("type(priority)      :",  priority)
+                            print("coalescing_id       :", coalescing_id)
+                            print("type(coalescing_id) :", coalescing_id)
+                            print("callback            :", callback)
+                            print("type(callback)      :", type(callback))
+                            print("gntp_callback       :", gntp_callback)
+                            print("type(gntp_callback) :", type(gntp_callback))
+                            print("kwargs              :", kwargs)
+                        
+                        self.publish(event, title, text, id_, sticky, priority, None, coalescing_id, callback, gntp_callback, **kwargs)
+                    except:
+                        try:
+                            if os.getenv('DEBUG_EXTRA'):
+                                print("registering [1] ....")
+                            self.register()
+                        except:
+                            pass
+                        self.publish(event, title, text, id_, sticky, priority, icon, coalescing_id, callback, gntp_callback, **kwargs)
+                        
+            else:
+                try:
+                    self.publish(event, title, text, id_, sticky, priority, None, coalescing_id, callback, gntp_callback, **kwargs)
+                except:
+                    try:
+                        if os.getenv('DEBUG_EXTRA'):
+                            print("registering [2] ....")
+                        self.register()
                     except:
                         pass
+                                        
                     self.publish(event, title, text, id_, sticky, priority, icon, coalescing_id, callback, gntp_callback, **kwargs)
-            else:
-                self.host = host
-                self.publish(event, title, text, id_, sticky, priority, icon, coalescing_id, callback, gntp_callback, **kwargs)
         else:
-            self.publish(event, title, text, id_, sticky, priority, icon, coalescing_id, callback, gntp_callback, **kwargs)        
+            try:
+                self.publish(event, title, text, id_, sticky, priority, None, coalescing_id, callback, gntp_callback, **kwargs)
+            except:
+                try:
+                    if os.getenv('DEBUG_EXTRA'):
+                        print("registering [3] ....")
+                    self.register()
+                except:
+                    pass
+                                
+                self.publish(event, title, text, id_, sticky, priority, icon, coalescing_id, callback, gntp_callback, **kwargs)
     
     def pub(self, *args, **kwargs):
         return self.Publish(*args, **kwargs)
@@ -175,7 +246,7 @@ class Growl(object):
     @classmethod
     def icon_processing(self, icon = None, iconpath = None):
 
-        if os.getenv('DEBUG'):
+        if os.getenv('DEBUG_EXTRA'):
             if icon:
                 try:
                     print("publish -> len(icon) =", len(icon))
@@ -183,12 +254,13 @@ class Growl(object):
                 except:
                     print(traceback.format_exc())
         
-        if os.getenv('DEBUG'):
+        if os.getenv('DEBUG_EXTRA'):
             print("publish -> iconpath =", iconpath)
             try:
                 print("publish -> len(icon) =", len(icon))
             except:
-                print(traceback.format_exc())                
+                pass
+                #print(traceback.format_exc())                
                 
         if not iconpath and self.IMPORT_CONFIGSET:
             iconpath = self.config.get_config('GENERAL', 'icon')
@@ -201,10 +273,13 @@ class Growl(object):
                 iconpath = os.path.join(os.path.dirname(__file__), 'growl.jpg')
             else:
                 iconpath = self.makeicon(stricon = icon)
-            if os.getenv('DEBUG'): print("iconpath 0:", iconpath)
+            if os.getenv('DEBUG_EXTRA'): print("iconpath 0:", iconpath)
             
         else:
-            if not os.path.isfile(iconpath): iconpath = self.makeicon(stricon = icon)
+            try:
+                if not os.path.isfile(iconpath): iconpath = self.makeicon(stricon = icon)
+            except:
+                iconpath = self.makeicon(stricon = icon)
         
         if icon:
             try:
@@ -216,9 +291,9 @@ class Growl(object):
                     icon = Resource(icon)
             except:
                 pass
-            if os.getenv('DEBUG'): print("iconpath 1:", iconpath)
+            if os.getenv('DEBUG_EXTRA'): print("iconpath 1:", iconpath)
         else:
-            if os.getenv('DEBUG'):
+            if os.getenv('DEBUG_EXTRA'):
                 print("iconpath 2:", iconpath)
             if iconpath:
                 try:
@@ -238,7 +313,7 @@ class Growl(object):
                         icon = Resource(open(iconpath, self.MODE_READ).read())
                 except:
                     pass
-        if os.getenv('DEBUG'):
+        if os.getenv('DEBUG_EXTRA'):
             try:
                 print("len_icon   =", len(icon))
             except:
@@ -253,11 +328,13 @@ class Growl(object):
     @classmethod
     def _publish(self, app, event, title, text, icon, iconpath, timeout, host = '127.0.0.1', port = 23053, gntp_callback = None, sticky = False):
         
+        #publisher = Publisher(app, [], timeout = timeout, host = host, port = port)
         publisher = Publisher(app, self.EVENT, icon=iconpath, timeout = timeout, host = host, port = port)
 
         try:
             publisher.publish(event, title, text, icon=icon, gntp_callback=gntp_callback, sticky = sticky)
         except:
+            if os.getenv('DEBUG_EXTRA'): print(traceback.format_exc())
             try:
                 publisher.register()
             except:
@@ -335,7 +412,8 @@ class Growl(object):
                 self._publish(app, event, title, text, icon, iconpath, timeout, host, port, gntp_callback, sticky)
                 
         else:
-            host = host or '127.0.0.1'
+            host = hosts or '127.0.0.1'
+            if os.getenv('DEBUG_EXTRA'): print("HOST:", host)
             self._publish(app, event, title, text, icon, iconpath, timeout, host, port, gntp_callback, sticky)
             
     @classmethod
@@ -353,8 +431,16 @@ class Growl(object):
 
     @classmethod
     def makeicon(self, path=None, stricon = None):
+        if os.getenv('DEBUG_EXTRA'): print("path:", path)
+        if stricon:
+            if os.path.isfile(stricon):
+                if not "image" in mimetypes.guess_type(path)[0]:
+                    stricon = None
+            elif not len(stricon) > 200:
+                stricon = None
         if not path:
             imgfile = os.path.abspath(os.path.join(os.path.dirname(__file__), 'growl.png'))
+            if os.getenv('DEBUG_EXTRA'): print("imgfile:", imgfile)
         else:
             if os.path.isdir(path):
                 imgfile = os.path.join(path, 'growl.png')
@@ -369,9 +455,8 @@ class Growl(object):
                 if os.path.isfile(imgfile):
                     if "image" in mimetypes.guess_type(imgfile)[0]:
                         return imgfile
-
-        if not self.stricon:
-            self.stricon = stricon
+                    
+        if stricon: self.stricon = stricon
         
         if not self.stricon: 
             self.stricon = """iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAABGdBTUEAAK/INwWK6QAAABl0RVh0
@@ -1344,7 +1429,7 @@ vCeffNI7ceKE/9RTTyX57IdMfygADgXAfRAGtwssYtoSAoksIFStVsO8QxuvkSCA+R+8t7Oz429u
 biaOHyCtbZHPHjyHC0CM7z/++OM+mfPe7OwsGDx4D6+9/PLLiUx9m4DdIdM/ggLg/xdgAJ/G1v7z
 h5WQAAAAAElFTkSuQmCC"""
 
-        if os.getenv('DEBUG'):
+        if os.getenv('DEBUG_EXTRA'):
             print("make_icon -> imgfile =", imgfile)
             print("make_icon -> type(self.stricon) =", type(self.stricon))
             print("make_icon -> len(self.stricon) =", len(self.stricon))
@@ -1353,11 +1438,16 @@ h5WQAAAAAElFTkSuQmCC"""
             with open(imgfile, 'wb') as img:
                 img.write(self.stricon.decode('base64'))
         else:
-            with open(imgfile, 'w') as img:
-                import base64
-                img.write(base64.b64decode(self.stricon))
+            try:
+                with open(imgfile, 'wb') as img:
+                    import base64
+                    img.write(base64.b64decode(self.stricon))
+            except TypeError:
+                with open(imgfile, 'w') as img:
+                    import base64
+                    img.write(base64.b64decode(self.stricon))            
                     
-        if os.getenv('DEBUG'):
+        if os.getenv('DEBUG_EXTRA'):
             print("make_icon -> imgfile =", imgfile)
         return imgfile
 
