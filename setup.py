@@ -64,11 +64,11 @@ version = __version__.version
 if sys.version_info.major == 3:
     entry_points = {
          "console_scripts": ["sendgrowl3 = sendgrowl:usage",]
-    },
+    }
 else:
     entry_points = {
          "console_scripts": ["sendgrowl = sendgrowl:usage",]
-    },    
+    }
 
 setup(
     name=NAME,

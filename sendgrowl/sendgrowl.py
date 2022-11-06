@@ -29,7 +29,12 @@ class growl(Publisher):
     try:
         CONFIG = configset.configset()
     except:
-        CONFIG = configset()
+        from importlib import util
+        spec = util.spec_from_file_location("configset", os.path.join(os.path.dirname(os.path.realpath(__file__)), "configset\\configset.py"))
+        configset = util.module_from_spec(spec)
+        sys.modules['configset'] = configset
+        spec.loader.exec_module(configset)
+        CONFIG = configset.configset()
     
     def __init__(self, name, event_defs, icon=None, custom_headers=None, app_specific_headers=None, gntp_client_class=None, **kwargs):
         #pass
@@ -55,7 +60,6 @@ class growl(Publisher):
 
     def Publish(self, event, title, text, id_=None, sticky=False, priority=0, icon=None, coalescing_id=None, callback=None, gntp_callback=None, app = None, events = None, iconpath = None, custom_headers=None, app_specific_headers=None, gntp_client_class=None , **kwargs):
         if app: self.name = app
-        if icon: self.icon = iconpath = icon
         if iconpath: self.icon = iconpath
         if custom_headers: self.custom_headers = custom_headers
         if app_specific_headers: self.app_specific_headers = app_specific_headers
@@ -111,10 +115,6 @@ class growl(Publisher):
                         if port:
                             self.port = port
                             
-                    self.host = i
-                    print("SELF.HOST:", self.host)
-                    print("SELF.ICON:", self.icon)
-                    self.__init__(self.name, self.event_defs, self.icon, host = i, port = port)
                     try:
                         if os.getenv('DEBUG_EXTRA'):
                             print("hosts               :", hosts)
@@ -127,8 +127,7 @@ class growl(Publisher):
                             print("type(title)         :", type(title))
                             print("text                :", text)
                             print("type(text)          :", type(text))
-                            print("icon                :", type(icon))
-                            print("self.icon           :", type(icon))
+                            print("icon                :", icon)
                             print("priority            :",  priority)
                             print("type(priority)      :",  priority)
                             print("coalescing_id       :", coalescing_id)
@@ -137,26 +136,21 @@ class growl(Publisher):
                             print("type(callback)      :", type(callback))
                             print("gntp_callback       :", gntp_callback)
                             print("type(gntp_callback) :", type(gntp_callback))
-                            #print("self.host           :", self.host)
                             print("kwargs              :", kwargs)
                         
-                        if not isinstance(icon, Resource): icon = Resource(open(icon, 'rb').read())
-                        self.publish(event, title, text, id_, sticky, priority, icon, coalescing_id, callback, gntp_callback, **kwargs)
+                        self.publish(event, title, text, id_, sticky, priority, None, coalescing_id, callback, gntp_callback, **kwargs)
                     except:
-                        print("ERROR:", traceback.format_exc())
                         try:
                             if os.getenv('DEBUG_EXTRA'):
                                 print("registering [1] ....")
                             self.register()
                         except:
                             pass
-                        if not isinstance(icon, Resource): icon = Resource(open(icon, 'rb').read())
                         self.publish(event, title, text, id_, sticky, priority, icon, coalescing_id, callback, gntp_callback, **kwargs)
                         
             else:
                 try:
-                    if not isinstance(icon, Resource): icon = Resource(open(icon, 'rb').read())
-                    self.publish(event, title, text, id_, sticky, priority, icon, coalescing_id, callback, gntp_callback, **kwargs)
+                    self.publish(event, title, text, id_, sticky, priority, None, coalescing_id, callback, gntp_callback, **kwargs)
                 except:
                     try:
                         if os.getenv('DEBUG_EXTRA'):
@@ -165,12 +159,10 @@ class growl(Publisher):
                     except:
                         pass
                                         
-                    if not isinstance(icon, Resource): icon = Resource(open(icon, 'rb').read())
                     self.publish(event, title, text, id_, sticky, priority, icon, coalescing_id, callback, gntp_callback, **kwargs)
         else:
             try:
-                if not isinstance(icon, Resource): icon = Resource(open(icon, 'rb').read())
-                self.publish(event, title, text, id_, sticky, priority, icon, coalescing_id, callback, gntp_callback, **kwargs)
+                self.publish(event, title, text, id_, sticky, priority, None, coalescing_id, callback, gntp_callback, **kwargs)
             except:
                 try:
                     if os.getenv('DEBUG_EXTRA'):
@@ -178,8 +170,7 @@ class growl(Publisher):
                     self.register()
                 except:
                     pass
-                
-                if not isinstance(icon, Resource): icon = Resource(open(icon, 'rb').read())
+                                
                 self.publish(event, title, text, id_, sticky, priority, icon, coalescing_id, callback, gntp_callback, **kwargs)
     
     def pub(self, *args, **kwargs):
@@ -363,9 +354,9 @@ class Growl(object):
             self.EVENT.append(event)
         else:
             self.EVENT.append(bytes(event, encoding = 'utf-8'))
-        if os.getenv('DEBUG_EXTRA'): print("HOST 3:", host)
+        
         host = host or self.parse_host(host)
-        if os.getenv('DEBUG_EXTRA'): print("HOST 4:", host)
+
         if not host and self.IMPORT_CONFIGSET:
             host = self.config.get_config('SERVER', 'host')
             if not host or host == "None" or host == "0" or host == 0:
@@ -383,9 +374,9 @@ class Growl(object):
         return event, host, port, timeout
                 
     @classmethod
-    def publish(self, app, event, title, text, host=None, port=None, timeout=None, icon=None, iconpath=None, gntp_callback = None, sticky = False):
-        if os.getenv('DEBUG_EXTRA'): print("HOST 5:", host)
-        event, host, port, timeout = self.check_attr(event, host, port, timeout)
+    def publish(self, app, event, title, text, hosts=None, port=None, timeout=None, icon=None, iconpath=None, gntp_callback = None, sticky = False):
+        
+        event, hosts, port, timeout = self.check_attr(event, hosts, port, timeout)
         
         icon, iconpath = self.icon_processing(icon, iconpath)
         
@@ -394,17 +385,16 @@ class Growl(object):
             print ("event             =", event)
             print ("title             =", title)
             print ("text              =", text)
-            print ("host             =", host)
+            print ("hosts             =", hosts)
             print ("port              =", port)
             print ("timeout           =", timeout)
             print ("icon              =", type(icon))
             print ("iconpath          =", iconpath)
             print ("type(iconpath)    =", type(iconpath))
             print ("-"*220)
-        
-        if os.getenv('DEBUG_EXTRA'): print("HOST 2:", host)
-        if isinstance(host, list):
-            for i in host:
+                
+        if isinstance(hosts, list):
+            for i in hosts:
                 if isinstance(i,  dict):
                     if ":" in i.get('host') and i.get('port'):
                         i['host'] = i.get('host').split(":")[0]
@@ -417,19 +407,15 @@ class Growl(object):
                         host, port = i.split(":")
                     else:
                         host = i
-                if os.getenv('DEBUG_EXTRA'): print("HOST 1:", host)
+                if os.getenv('DEBUG_EXTRA'):
+                    print('host:', host)
                 self._publish(app, event, title, text, icon, iconpath, timeout, host, port, gntp_callback, sticky)
                 
         else:
-            host = host or '127.0.0.1'
+            host = hosts or '127.0.0.1'
             if os.getenv('DEBUG_EXTRA'): print("HOST:", host)
             self._publish(app, event, title, text, icon, iconpath, timeout, host, port, gntp_callback, sticky)
             
-    @classmethod
-    def Publish(self, event, title, text, host=None, port=None, timeout=None, icon=None, iconpath=None, gntp_callback = None, sticky = False, app = "Growl", **kwargs):
-        
-        if os.getenv('DEBUG_EXTRA'): print("HOST 0:", host)
-        return self.publish(app, event, title, text, host, port, timeout, icon, iconpath, gntp_callback, sticky, **kwargs)
     @classmethod
     def send(self, event, title, text):
         if not isinstance(event, list):
