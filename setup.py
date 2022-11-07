@@ -93,7 +93,7 @@ setup(
         'configset'
     ],
     entry_points = entry_points,
-    package_data={'': ['__version__.py', 'growl.png', 'sendgrowl.ini']},
+    package_data={NAME: ['__version__.py', 'growl.png', 'sendgrowl.ini']},
     include_package_data=True,
     python_requires=">=2.7",    
     classifiers=[
