@@ -336,7 +336,7 @@ class Growl(object):
         
     @classmethod
     def _publish(self, app, event, title, text, icon, iconpath, timeout, host = '127.0.0.1', port = 23053, gntp_callback = None, sticky = False):
-        
+        if isinstance(host, list): host = host[0]
         #publisher = Publisher(app, [], timeout = timeout, host = host, port = port)
         publisher = Publisher(app, self.EVENT, icon=iconpath, timeout = timeout, host = host, port = port)
 
