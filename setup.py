@@ -8,7 +8,7 @@ NAME = "sendgrowl"
 
 def get_version():
     """Get version and version_info without importing the entire module."""
-    print("NAME:", NAME)
+    # print("NAME:", NAME)
     path = os.path.join(os.path.dirname(__file__), NAME, '__meta__.py')
 
     if sys.version_info.major == 3:
@@ -64,7 +64,7 @@ version = __version__.version
 
 if sys.version_info.major == 3:
     entry_points = {
-         "console_scripts": ["sendgrowl3 = sendgrowl:usage",]
+         "console_scripts": ["sendgrowl3 = sendgrowl:usage","sendgrowl = sendgrowl:usage"]
     }
 else:
     entry_points = {
@@ -96,15 +96,13 @@ setup(
     entry_points = entry_points,
     package_data={'': ['__version__.py', 'growl.png', 'sendgrowl.ini']},
     include_package_data=True,
-    python_requires=">=2.7",    
+    python_requires="3",    
     classifiers=[
         'Development Status :: %s' % DEVSTATUS,
         'Environment :: Console',
         "Intended Audience :: Developers",
         'License :: OSI Approved :: MIT License',
         "Operating System :: OS Independent",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 3",
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],

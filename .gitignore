@@ -10,3 +10,5 @@
 dist/
 build/
 *.egg-info/
+icon1.txt
+__pycache__/
