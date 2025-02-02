@@ -96,7 +96,7 @@ setup(
     entry_points = entry_points,
     package_data={'': ['__version__.py', 'growl.png', 'sendgrowl.ini']},
     include_package_data=True,
-    python_requires="3",    
+    python_requires="3.x",    
     classifiers=[
         'Development Status :: %s' % DEVSTATUS,
         'Environment :: Console',
