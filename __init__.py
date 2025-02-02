@@ -1,1 +1,0 @@
-from .sendgrowl import * 

@@ -56,8 +56,6 @@ try:
 except:
     pass
 shutil.copy2('__version__.py', NAME)
-shutil.copy2('sendgrowl.py', NAME)
-shutil.copy2('__init__.py', NAME)
 
 import __version__
 version = __version__.version
