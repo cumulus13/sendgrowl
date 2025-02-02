@@ -3,7 +3,7 @@ from __future__ import print_function
 
 import os, sys
 from gntplib import Publisher, Resource, GNTPClient #coerce_to_events
-import gntplib
+# import gntplib
 import mimetypes
 import argparse
 import traceback
@@ -13,7 +13,30 @@ import re
 from pathlib import Path
 from pydebugger.debug import debug
 import ast
+from make_colors import make_colors
 
+class Error:
+    
+    def __init__(self, tp, vp, tb, id, host, port):
+        
+        if vp.__str__() == 'timed out':
+            # if __name__ == '__main__' or os.getenv('VERBOSE') == '1':
+            print(f"{make_colors('[sendgrowl]', 'lc')} {make_colors(f'E{id}', 'lw', 'm')} [{make_colors(tb.tb_lineno.__str__(), 'lw', 'bl')}]: {make_colors('failed send to', 'ly')} {make_colors(f'{host}', 'b', 'lg')}:{make_colors(f'{port}', 'lb')} => {make_colors(vp.__str__(), 'lw', 'r')}, {make_colors('use -vv or -vvv for more details.', 'lm') if not os.getenv('DEBUG' or 'VERBOSE') else ''}")
+            if os.getenv('TRACEBACK') == '1': print(traceback.format_exc())
+        else:
+            if os.getenv('TRACEBACK') == '1': print(traceback.format_exc())
+            if os.getenv('VERBOSE') == '1':
+                print(f"{make_colors('[sendgrowl]', 'lc')} {make_colors(f'E{id}', 'lw', 'm')} [{make_colors(tb.tb_lineno.__str__(), 'lw', 'bl')}]:")
+                for i in ast.literal_eval(vp.__str__().replace("b'", "'")):
+                    if 'original message:' in i:
+                        print(make_colors("original message:", 'b', 'y'))
+                        print(make_colors(ast.literal_eval(i.split('original message:')[1].strip()), 'lw', 'bl'))
+                    else:
+                        print(make_colors(i, 'lw', 'm'))
+            else:
+                # print(f"[sendgrowl] E{id} [{tb.tb_lineno.__str__()}]: failed send to {host}:{port}, {'use -vv or -vvv for more details.' if not os.getenv('DEBUG' or 'VERBOSE') else ''}")
+                # if __name__ == '__main__' or os.getenv('VERBOSE') == '1':
+                print(f"{make_colors('[sendgrowl]', 'lc')} {make_colors(f'E{id}', 'lw', 'm')} [{make_colors(tb.tb_lineno.__str__(), 'lw', 'bl')}]: {make_colors('failed send to', 'y')} {make_colors(f'{host}', 'b', 'lg')}:{make_colors(f'{port}', 'lb')}, {make_colors('use -vv or -vvv for more details.', 'lm') if not os.getenv('DEBUG' or 'VERBOSE') else ''}")
 
 class Growl(Publisher):
     MODE_WRITE = 'wb'
@@ -143,7 +166,7 @@ class Growl(Publisher):
                         port = int(ports[hosts.index(i)]) if ports and len(hosts) == len(ports) and str(ports[hosts.index(i)]).isdigit() else ports[0] if str(ports[0]).isdigit() else 23053
                 
                 try:
-                    if os.getenv('DEBUG_EXTRA') or os.getenv('VERBOSE'):
+                    if os.getenv('DEBUG_EXTRA'):
                         print("hosts               :", hosts)
                         print("type(hosts)         :", type(hosts))
                         print("port                :", port)
@@ -185,40 +208,32 @@ class Growl(Publisher):
                     if "Notification type not registered" in vp.__str__():
                         super().__init__(self.name, self.event_defs, self.icon, host = host, port = port, timeout = int(self.timeout or 1))
                         try:
-                            if os.getenv('DEBUG') or os.getenv('VERBOSE'): print(f"register for {host}:{port}/{self.name}/{title}/{event}")
+                            if os.getenv('DEBUG') == '1' or os.getenv('VERBOSE') == '1' or os.getenv('TRACEBACK') == '1' or os.getenv('DEBUG_EXTRA') == '1': print(f"register for {host}:{port}/{self.name}/{title}/{event}")
                             # print(f"register for {host}:{port}/{self.name}/{title}/{event}")
                             self.register()
                         except Exception as e1:
                             tp2, vp2, tb2 = sys.exc_info() 
-                            if os.getenv('DEBUG') or os.getenv('VERBOSE'):
-                                print(traceback.format_exc())
-                            else:
-                                print(f"[sendgrowl] E0 [{tb.tb_lineno.__str__()}]: {e}, {'activate verbose env to more detail.' if not os.getenv('DEBUG' or 'VERBOSE') else ''}")
-                                print(f"[sendgrowl] E1 [{tb2.tb_lineno.__str__()}]: {e1}, {'activate verbose env to more detail.' if not os.getenv('DEBUG' or 'VERBOSE') else ''}")
+                            # if os.getenv('DEBUG') == '1' or os.getenv('VERBOSE') == '1' or os.getenv('TRACEBACK') == '1':
+                            #     print(traceback.format_exc())
+                            # else:
+                            Error(tp, vp, tb, 0, host, port)
+                            Error(tp2, vp2, tb2, 1, host, port)
+                                # print(f"[sendgrowl] E0 [{tb.tb_lineno.__str__()}]: {e}, {'activate verbose env to more detail.' if not os.getenv('DEBUG' or 'VERBOSE') else ''}")
+                                # print(f"[sendgrowl] E1 [{tb2.tb_lineno.__str__()}]: {e1}, {'activate verbose env to more detail.' if not os.getenv('DEBUG' or 'VERBOSE') else ''}")
                     
                     # if not isinstance(icon, Resource): icon = Resource(open(icon, 'rb').read())
                     try:
                         self.publish(event, title, text, id_, sticky, priority, icon, coalescing_id, callback, gntp_callback, **kwargs)
                     except Exception as e2:
                         tp1, vp1, tb1 = sys.exc_info()
-                        if vp1.__str__() == 'timed out':
-                            print(f"[sendgrowl] E2 [{tb1.tb_lineno.__str__()}]: failed send to {host}:{port} => {vp1.__str__()}, {'activate verbose env to more detail.' if not os.getenv('DEBUG' or 'VERBOSE') else ''}")
-                        if os.getenv('DEBUG') or os.getenv('VERBOSE'):
-                            print(traceback.format_exc())
-                        else:   
-                            if os.getenv('DEBUG') or os.getenv('VERBOSE'):
-                                print(traceback.format_exc())
-                            else:
-                                if os.getenv('DEBUG') or os.getenv('VERBOSE'):
-                                    print(f"[sendgrowl] E3 [{tb1.tb_lineno.__str__()}]: ", end = '')
-                                    for i in ast.literal_eval(vp1.__str__().replace("b'", "'")):
-                                        if 'original message:' in i:
-                                            print("original message:")
-                                            print(ast.literal_eval(i.split('original message:')[1].strip()))
-                                        else:
-                                            print(i)
-                                else:
-                                    print(f"[sendgrowl] E2 [{tb1.tb_lineno.__str__()}]: failed send to {host}:{port}, {'activate verbose env to more detail.' if not os.getenv('DEBUG' or 'VERBOSE') else ''}")
+                        super().__init__(self.name, self.event_defs, self.icon, host = host, port = port, timeout = int(self.timeout or 1))
+                        try:
+                            if os.getenv('DEBUG') == '1' or os.getenv('VERBOSE') == '1' or os.getenv('TRACEBACK') == '1' or os.getenv('DEBUG_EXTRA') == '1': print(f"register for {host}:{port}/{self.name}/{title}/{event}")
+                            # print(f"register for {host}:{port}/{self.name}/{title}/{event}")
+                            self.register()
+                        except Exception as e3:
+                            # tp3, vp3, tb3 = sys.exc_info() 
+                            Error(*sys.exc_info(), 3, host, port)
         else:
             try:
                 super().__init__(self.name, self.event_defs, self.icon, host = host, port = port, timeout = int(self.timeout or 1))
@@ -253,20 +268,54 @@ class Growl(Publisher):
         parser.add_argument('-P', '--port', action = 'store', help = 'port growl server')
         parser.add_argument('-t', '--timeout', action = 'store', help = 'Timeout message display default: 20')
         parser.add_argument('-i', '--icon', action = 'store', help = 'Image icon path, default growl icon')
+        parser.add_argument('-s', '--sticky', action = 'store_true', help = 'Sticky notification')
+        parser.add_argument('-p', '--priority', action = 'store', help = 'Priority number, default 0', default = 0, type = int)
+        parser.add_argument('-c', '--callback', action = 'store', help = 'Call back function')
+        parser.add_argument('-gc', '--gntp-callback', action = 'store', help = 'GNTP Call back function')
+        parser.add_argument('-x', '--custom-headers', action = 'store', help = 'Custom Headers')
+        parser.add_argument('-ax', '--app-headers', action = 'store', help = 'Custom Headers for app')
+        parser.add_argument('-gC', '--gntp-client-class', action = 'store', help = 'GNTP client Class')
+        parser.add_argument('-id', '--id', action = 'store', help = 'ID')
+        parser.add_argument('-cd', '--coalescing-id', action = 'store', help = 'Coalescing Id')
+        parser.add_argument('-v', '--verbose', help = 'Verbose', action = 'count')
+        
         # parser.add_argument('-p', '--pushbullet', action = 'store_true', help = 'Forward to pushbullet')
         if len(sys.argv) == 1:
             parser.print_help()
         else:
             args = parser.parse_args()
+            
+            if args.verbose == 1:
+                os.environ.update({'VERBOSE':'1'})
+            elif args.verbose == 2:
+                os.environ.update({'VERBOSE':'1'})
+                os.environ.update({'DEBUG_EXTRA':'1'})
+            elif args.verbose == 3:
+                os.environ.update({'VERBOSE':'1'})
+                os.environ.update({'DEBUG':'1'})
+                os.environ.update({'DEBUG_EXTRA':'1'})
+                os.environ.update({'TRACEBACK':'1'})
+            
             self.Publish(
                 args.APP_NAME, 
                 args.EVENT_NAME, 
                 args.TITLE, 
                 args.TEXT, 
+                args.id,
+                args.sticky,
+                args.priority,
+                args.icon,
+                args.coalescing_id,
+                args.callback, 
+                args.gntp_callback,
+                None, 
+                None,
+                args.custom_headers,
+                args.app_headers,
+                args.gntp_client_class,
                 host = args.host, 
                 port = args.port, 
-                timeout = args.timeout, 
-                iconpath = args.icon,
+                timeout = args.timeout
             )
 
 class growl(Growl):

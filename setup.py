@@ -72,7 +72,7 @@ setup(
     author_email = 'cumulus13@gmail.com',
     maintainer="cumulus13 Team",
     maintainer_email="cumulus13@gmail.com",    
-    description = ('simple send notify to growl'),
+    description = ('simple send notify to growl with multiple host and port'),
     license = 'MIT',
     keywords = "growl windows linux gntp gntplib 23053",
     url = 'https://github.com/cumulus13/sendgrowl',
