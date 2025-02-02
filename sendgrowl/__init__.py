@@ -1,1 +1,1 @@
-from sendgrowl import Growl, growl, Sendgrowl, SendGrowl
+from . growl import Growl, growl, Sendgrowl, SendGrowl

@@ -1,4 +1,3 @@
-from .sendgrowl import usage
+from .growl import usage
 
-def usage():
-    return usage
+usage()

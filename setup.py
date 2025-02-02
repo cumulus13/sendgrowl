@@ -85,7 +85,8 @@ setup(
     install_requires=[
         'gntplib',
         'argparse',
-        'configset'
+        'configset',
+        'pydebugger'
     ],
     entry_points = entry_points,
     package_data={'': ['__version__.py', 'growl.png', 'sendgrowl.ini']},
