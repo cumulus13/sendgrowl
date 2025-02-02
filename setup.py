@@ -62,7 +62,7 @@ if sys.version_info.major == 3:
     }
 else:
     entry_points = {
-         "console_scripts": ["sendgrowl = sendgrowl:usage",]
+         "console_scripts": ["sendgrowl = growl:usage",]
     }
 
 setup(
@@ -89,7 +89,7 @@ setup(
         'pydebugger'
     ],
     entry_points = entry_points,
-    package_data={'': ['__version__.py', 'growl.png', 'sendgrowl.ini']},
+    package_data={'': ['__version__.py', 'growl.png', 'growl.ini']},
     include_package_data=True,
     python_requires=">=3.0",    
     classifiers=[

@@ -25,7 +25,7 @@ class Growl(Publisher):
     APP_SPECIFIC_HEADERS = None
     GNTP_CLIENT_CLASS = None
     KWARGS = {}
-    CONFIG = configset()
+    CONFIG = configset(str(Path(__file__).parent / 'growl.ini'))
     TIMEOUT = 1
     
     def __init__(self, name = None, event_defs = [], icon=None, custom_headers=None, app_specific_headers=None, gntp_client_class=None, **kwargs):
