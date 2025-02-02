@@ -19,7 +19,7 @@ $ pip install sendgrowl
 run on terminal/cmd
 
 ```bash
-> usage: sendgrowl.py [-h] [-H [HOST ...]] [-P PORT] [-t TIMEOUT] [-i ICON] APP_NAME EVENT_NAME TITLE TEXT
+$ usage: sendgrowl [-h] [-H [HOST ...]] [-P PORT] [-t TIMEOUT] [-i ICON] [-s] [-p PRIORITY] [-c CALLBACK] [-gc GNTP_CALLBACK] [-x CUSTOM_HEADERS] [-ax APP_HEADERS] [-gC GNTP_CLIENT_CLASS] [-id ID] [-cd COALESCING_ID] [-v] APP_NAME EVENT_NAME TITLE TEXT
 
 positional arguments:
   APP_NAME              App name as registered/registering
@@ -35,7 +35,23 @@ options:
   -t TIMEOUT, --timeout TIMEOUT
                         Timeout message display default: 20
   -i ICON, --icon ICON  Image icon path, default growl icon
-
+  -s, --sticky          Sticky notification
+  -p PRIORITY, --priority PRIORITY
+                        Priority number, default 0
+  -c CALLBACK, --callback CALLBACK
+                        Call back function
+  -gc GNTP_CALLBACK, --gntp-callback GNTP_CALLBACK
+                        GNTP Call back function
+  -x CUSTOM_HEADERS, --custom-headers CUSTOM_HEADERS
+                        Custom Headers
+  -ax APP_HEADERS, --app-headers APP_HEADERS
+                        Custom Headers for app
+  -gC GNTP_CLIENT_CLASS, --gntp-client-class GNTP_CLIENT_CLASS
+                        GNTP client Class
+  -id ID, --id ID       ID
+  -cd COALESCING_ID, --coalescing-id COALESCING_ID
+                        Coalescing Id
+  -v, --verbose         Verbose
 ```
 
 ## Support
