@@ -51,10 +51,6 @@ try:
     os.remove(os.path.join(NAME, '__version__.py'))
 except:
     pass
-try:
-    os.remove(os.path.join(NAME, 'sendgrowl.py'))
-except:
-    pass
 shutil.copy2('__version__.py', NAME)
 
 import __version__
@@ -94,7 +90,7 @@ setup(
     entry_points = entry_points,
     package_data={'': ['__version__.py', 'growl.png', 'sendgrowl.ini']},
     include_package_data=True,
-    python_requires="3.x",    
+    python_requires=">=3.0",    
     classifiers=[
         'Development Status :: %s' % DEVSTATUS,
         'Environment :: Console',
