@@ -14,3 +14,4 @@ icon1.txt
 __pycache__/
 traceback.log
 *.bck
+*.code-workspace
